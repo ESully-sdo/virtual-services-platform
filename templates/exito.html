@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Listo!</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center;}
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+        .check-icon { font-size: 60px; color: #10b981; margin-bottom: 20px; }
+        h1 { font-size: 24px; color: #111; margin: 0; }
+        p { color: #6b7280; margin-top: 10px; line-height: 1.5; }
+        .turno-badge { background: #f3f4f6; padding: 10px 20px; border-radius: 50px; font-weight: bold; color: #374151; display: inline-block; margin: 20px 0; }
+        
+        /* Botón mejorado */
+        .btn { 
+            display: inline-block; 
+            text-decoration: none; 
+            color: white; 
+            background-color: #3b82f6;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600; 
+            margin-top: 20px; 
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="check-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h1>¡Estás en la fila!</h1>
+        
+        <div class="turno-badge">Turno ID: #{{ turno }}</div>
+        
+        <p>Gracias <strong>{{ nombre }}</strong>. <br>Te enviaremos un SMS y WhatsApp cuando sea tu turno.</p>
+        
+        <!-- ENLACE CORREGIDO: Regresa al Kiosco del negocio, no al login -->
+        <a href="/b/{{ nid }}" class="btn">Volver al Inicio</a>
+    </div>
+</body>
+</html>

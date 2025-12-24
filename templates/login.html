@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso | Virtual Services</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; height: 100vh; display: flex; background: #fff; }
+        
+        /* LADO IZQUIERDO: IMAGEN Y BRANDING */
+        .brand-section {
+            flex: 1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .brand-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(#334155 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.1;
+        }
+
+        .brand-content { position: relative; z-index: 2; max-width: 400px; }
+        .brand-logo { font-size: 32px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .brand-logo i { color: #3b82f6; }
+        .brand-text { font-size: 18px; line-height: 1.6; color: #94a3b8; }
+        
+        /* LADO DERECHO: FORMULARIO */
+        .form-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background-color: #ffffff;
+        }
+        
+        .login-card { width: 100%; max-width: 380px; }
+        .login-header { margin-bottom: 40px; }
+        .login-header h2 { font-size: 28px; color: #0f172a; margin-bottom: 8px; }
+        .login-header p { color: #64748b; }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 14px; font-weight: 500; color: #334155; margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 40px; 
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        input:focus { border-color: #3b82f6; background: white; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #334155; transform: translateY(-1px); }
+        button:disabled { background-color: #94a3b8; cursor: not-allowed; transform: none; opacity: 0.6; }
+        
+        .alert { 
+            background: #fee2e2; color: #b91c1c; 
+            padding: 12px; border-radius: 8px; 
+            font-size: 14px; margin-bottom: 20px; 
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* ESTILOS PARA EL TIMER DE BLOQUEO */
+        #blocked-message { 
+            display: none; 
+            text-align: center; 
+            padding: 20px; 
+            background: #fff1f2; 
+            border: 1px solid #fda4af; 
+            border-radius: 8px; 
+            color: #be123c; 
+            margin-bottom: 20px; 
+        }
+        .timer { font-weight: 800; font-size: 18px; margin-top: 5px; display: block; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .brand-section { display: none; }
+            .form-section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Izquierda -->
+    <div class="brand-section">
+        <div class="brand-content">
+            <div class="brand-logo"><i class="fa-solid fa-cube"></i> Virtual Services</div>
+            <p class="brand-text">Gestión inteligente para negocios modernos.</p>
+        </div>
+    </div>
+
+    <!-- Derecha -->
+    <div class="form-section">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Bienvenido</h2>
+                <p>Ingresa tus credenciales para administrar.</p>
+            </div>
+
+            <!-- MENSAJE DE BLOQUEO (Oculto por defecto) -->
+            <div id="blocked-message">
+                <i class="fa-solid fa-lock"></i> Demasiados intentos fallidos.<br>
+                Espera <span id="countdown" class="timer">60</span> segundos.
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <!-- Si Flask dice que hubo muchos intentos, activamos el bloqueo -->
+                {% if messages[0] == "TOO_MANY_ATTEMPTS" %}
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            activarBloqueo();
+                        });
+                    </script>
+                {% else %}
+                    <div class="alert"><i class="fa-solid fa-circle-exclamation"></i> {{ messages[0] }}</div>
+                {% endif %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" id="loginForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <!-- CAMPO NUEVO: TELÉFONO (Necesario para saber qué negocio es) -->
+                <div class="input-group">
+                    <label>Usuario (Teléfono)</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" name="telefono" placeholder="Ej. 5512345678" required autofocus>
+                    </div>
+                </div>
+
+                <!-- CAMPO CONTRASEÑA -->
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+                
+                <button type="submit" id="btnSubmit">Iniciar Sesión <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i></button>
+            </form>
+            
+            <p style="margin-top: 30px; font-size: 13px; color: #94a3b8; text-align: center;">
+                &copy; 2025 Virtual Services Platform
+            </p>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE BLOQUEO -->
+    <script>
+        function activarBloqueo() {
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('btnSubmit');
+            const inputs = form.getElementsByTagName('input');
+            const msg = document.getElementById('blocked-message');
+            const timerSpan = document.getElementById('countdown');
+
+            // 1. Mostrar mensaje y bloquear
+            msg.style.display = 'block';
+            btn.disabled = true;
+            for(let i=0; i<inputs.length; i++) inputs[i].disabled = true;
+
+            // 2. Cuenta regresiva
+            let timeLeft = 60;
+            const timer = setInterval(function() {
+                timeLeft--;
+                timerSpan.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    // 3. Desbloquear
+                    msg.style.display = 'none';
+                    btn.disabled = false;
+                    for(let i=0; i<inputs.length; i++) inputs[i].disabled = false;
+                    
+                    // Limpiar la URL para que si recargan no se vuelva a bloquear
+                    try {
+                        // Envolvemos en try-catch por si el navegador bloquea la modificación del historial (común en iframes/previews)
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } catch (e) {
+                        console.log("No se pudo limpiar la URL del historial:", e);
+                    }
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

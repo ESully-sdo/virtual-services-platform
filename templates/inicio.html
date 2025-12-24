@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido | {{ negocio.nombre }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { max-width: 480px; width: 100%; text-align: center; }
+        
+        .logo-area { margin-bottom: 40px; }
+        .logo-icon { font-size: 40px; color: #3b82f6; margin-bottom: 10px; }
+        h1 { color: #0f172a; font-size: 24px; margin: 0; }
+        p { color: #64748b; margin-top: 5px; }
+
+        .menu-card { 
+            background: white; 
+            border-radius: 16px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            overflow: hidden; 
+            text-align: left; 
+        }
+        
+        .menu-item {
+            display: flex; 
+            align-items: center; 
+            padding: 25px;
+            border-bottom: 1px solid #f1f5f9; 
+            text-decoration: none;
+            transition: background 0.2s;
+            color: inherit;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:hover { background: #f8fafc; }
+        
+        .icon-box {
+            width: 50px; height: 50px; background: #eff6ff; color: #3b82f6;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-right: 20px;
+            flex-shrink: 0;
+        }
+        .icon-box.green { background: #ecfdf5; color: #10b981; }
+        .icon-box.orange { background: #fff7ed; color: #f97316; }
+        
+        .text-content { flex: 1; }
+        .text-content h3 { margin: 0; font-size: 16px; color: #1e293b; font-weight: 600; }
+        .text-content span { font-size: 13px; color: #94a3b8; display: block; margin-top: 2px; }
+        
+        .arrow { color: #cbd5e1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-store"></i></div>
+            <h1>{{ negocio.nombre }}</h1>
+            <p style="color: #64748b;">{{ config.fila_descripcion or 'Selecciona una opción' }}</p>
+        </div>
+
+        <div class="menu-card">
+            <!-- Opción 1: Fila Virtual -->
+            <a href="/b/{{ nid }}/registro" class="menu-item">
+                <div class="icon-box"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div class="text-content">
+                    <h3>{{ config.fila_titulo or 'Fila Virtual' }}</h3>
+                    <span>Regístrate para ser atendido</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+
+            <!-- Opción 2: Chatbot WhatsApp (DINÁMICO) -->
+            <!-- AHORA USA EL NÚMERO DE LA BASE DE DATOS -->
+            <a href="https://wa.me/{{ negocio.whatsapp_publico }}" class="menu-item" target="_blank">
+                <div class="icon-box green"><i class="fa-brands fa-whatsapp"></i></div>
+                <div class="text-content">
+                    <h3>Asistente Virtual</h3>
+                    <span>Consulta precios y horarios</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+
+            <!-- Opción 3: Rastreo (Solo si el módulo de taller está activo) -->
+            <!-- Usamos una condición simple de visualización, el bloqueo real está en el backend -->
+            <a href="/b/{{ nid }}/rastreo" class="menu-item">
+                <div class="icon-box orange"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <div class="text-content">
+                    <h3>Rastrear Equipo</h3>
+                    <span>Ver estatus de reparación</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 12px; color: #cbd5e1;">
+            Powered by Virtual Services
+        </div>
+    </div>
+</body>
+</html>

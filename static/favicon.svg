@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Fondo Azul Oscuro (Tu color corporativo) -->
+  <rect width="100" height="100" rx="24" fill="#0f172a"/>
+  <!-- Letras VS en Azul Brillante -->
+  <text x="50" y="72" font-family="sans-serif" font-weight="900" font-size="65" text-anchor="middle" fill="#3b82f6">VS</text>
+</svg>
+

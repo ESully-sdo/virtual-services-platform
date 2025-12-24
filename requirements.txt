@@ -1,0 +1,11 @@
+Flask
+mysql-connector-python
+requests
+gunicorn
+flask
+mysql-connector-python
+requests
+gunicorn
+werkzeug
+flask-wtf
+flask-limiter

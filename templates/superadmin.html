@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin | Virtual Services</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; padding: 40px; margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #334155; padding-bottom: 20px; }
+        h1 { font-size: 24px; color: #fff; margin: 0; display: flex; align-items: center; gap: 10px; }
+        .logout { color: #ef4444; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .logout:hover { text-decoration: underline; }
+        
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+        h3 { margin-top: 0; color: #38bdf8; font-size: 18px; margin-bottom: 20px; }
+        
+        /* Formulario Crear */
+        .create-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end; }
+        label { display: block; font-size: 12px; margin-bottom: 5px; color: #94a3b8; font-weight: 600; }
+        input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #38bdf8; }
+        
+        button { padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        button:hover { background: #2563eb; }
+        
+        /* Tabla */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 15px; color: #94a3b8; border-bottom: 1px solid #334155; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 15px; border-bottom: 1px solid #334155; font-size: 14px; color: #e2e8f0; }
+        tr:last-child td { border-bottom: none; }
+        
+        .link { color: #38bdf8; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .link:hover { text-decoration: underline; }
+        
+        .alert { background: #064e3b; color: #34d399; padding: 15px; border-radius: 6px; margin-top: 20px; border: 1px solid #059669; }
+
+        @media (max-width: 768px) {
+            .create-form { grid-template-columns: 1fr; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-crown" style="color: #fbbf24;"></i> Panel Maestro</h1>
+            <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
+        </div>
+
+        <!-- Creador de Negocios -->
+        <div class="card">
+            <h3><i class="fa-solid fa-plus-circle"></i> Dar de Alta Nuevo Cliente</h3>
+            <form method="POST" class="create-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div>
+                    <label>Nombre del Negocio</label>
+                    <input type="text" name="nombre" placeholder="Ej. Barbería El Rey" required>
+                </div>
+                <div>
+                    <label>Teléfono Admin (Usuario)</label>
+                    <input type="text" name="telefono" placeholder="5512345678" required>
+                </div>
+                <div>
+                    <label>Contraseña Inicial</label>
+                    <input type="text" name="password" placeholder="Secreto123" required>
+                </div>
+                <button type="submit">Crear Cuenta</button>
+            </form>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="alert"><i class="fa-solid fa-check-circle"></i> {{ messages[0] }}</div>
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Lista de Clientes -->
+        <div class="card">
+            <h3><i class="fa-solid fa-list"></i> Clientes Activos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Negocio</th>
+                        <th>Admin (Tel)</th>
+                        <th>Kiosco Público</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for n in negocios %}
+                    <tr>
+                        <td><span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 12px;">#{{ n.id }}</span></td>
+                        <td style="font-weight: 600;">{{ n.nombre }}</td>
+                        <td>{{ n.telefono_admin }}</td>
+                        <td>
+                            <a href="/b/{{ n.id }}" target="_blank" class="link">
+                                Ver Kiosco <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Aún no hay clientes registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

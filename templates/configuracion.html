@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración | {{ negocio.nombre }}</title>
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; transition: all 0.3s; }
+        
+        /* SIDEBAR */
+        .sidebar { background: #0f172a; color: #f1f5f9; padding: 24px; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.05); z-index: 50; transition: transform 0.3s ease; }
+        .logo { font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between; letter-spacing: -0.5px; }
+        .logo-text { display: flex; align-items: center; gap: 12px; }
+        .logo i { color: #3b82f6; font-size: 24px; }
+        .nav-link { display: flex; align-items: center; padding: 14px 16px; color: #94a3b8; text-decoration: none; border-radius: 10px; margin-bottom: 6px; font-weight: 500; transition: all 0.2s ease; font-size: 14px; }
+        .nav-link:hover { background-color: #1e293b; color: white; transform: translateX(4px); }
+        .nav-link.active { background-color: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .logout-btn { margin-top: auto; color: #ef4444 !important; background: rgba(239, 68, 68, 0.1); }
+        .logout-btn:hover { background: #ef4444; color: white !important; }
+
+        /* CONTENIDO */
+        .main-content { padding: 40px; overflow-x: hidden; }
+        
+        /* HEADER */
+        .header { margin-bottom: 30px; display: flex; align-items: center; gap: 15px; }
+        .header-text h1 { font-size: 28px; font-weight: 800; color: #1e293b; margin: 0 0 5px 0; }
+        .header-text p.subtitle { color: #64748b; margin: 0; }
+
+        /* TARJETAS */
+        .card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; background: #f8fafc; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 24px; }
+
+        /* FORMULARIOS */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; outline: none;
+        }
+        .form-group input:focus { border-color: #3b82f6; ring: 2px solid #bfdbfe; }
+        .form-group small { display: block; margin-top: 4px; font-size: 11px; color: #94a3b8; }
+
+        /* KIOSCO LINK */
+        .kiosco-box { background: #eff6ff; padding: 15px; border-radius: 8px; border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+        .kiosco-link { color: #2563eb; font-weight: 600; text-decoration: none; word-break: break-all; }
+        .btn-copy { background: white; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: #2563eb; font-size: 12px; font-weight: 600; transition: background 0.2s; }
+        .btn-copy:hover { background: #eff6ff; }
+
+        /* SWITCHES */
+        .switch-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .switch-group input[type="checkbox"] { width: 20px; height: 20px; accent-color: #3b82f6; cursor: pointer; }
+        .switch-group label { margin: 0; cursor: pointer; font-size: 14px; color: #334155; font-weight: 500; }
+
+        /* BOTONES */
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; transition: background 0.2s; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
+
+        /* TABLA SERVICIOS */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 12px; background: #f1f5f9; font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: 600; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; }
+        
+        /* ELEMENTOS MÓVILES */
+        .menu-toggle { 
+            display: none; 
+            font-size: 20px; 
+            color: #334155; 
+            cursor: pointer;
+            background-color: #e2e8f0; 
+            padding: 10px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .close-menu { display: none; cursor: pointer; color: #94a3b8; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 40; backdrop-filter: blur(2px); }
+
+        @media (max-width: 768px) { 
+            body { grid-template-columns: 1fr; } 
+            .sidebar { position: fixed; left: -100%; width: 85%; max-width: 300px; height: 100vh; }
+            .sidebar.active { left: 0; }
+            .menu-toggle { display: block; }
+            .close-menu { display: block; }
+            .overlay.active { display: block; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay para móvil -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-text">
+                <i class="fa-solid fa-cube"></i> Virtual<span>S.</span>
+            </div>
+            <i class="fa-solid fa-times close-menu" onclick="toggleMenu()"></i>
+        </div>
+        
+        <a href="{{ url_for('admin') }}" class="nav-link"><i class="fa-solid fa-gauge-high" style="margin-right:12px;"></i> Dashboard</a>
+        
+        <!-- BD FILA -->
+        <a href="/admin/historial_fila" class="nav-link"><i class="fa-solid fa-users-line" style="margin-right:12px;"></i> BD Fila</a>
+
+        <!-- MÓDULOS CONDICIONALES -->
+        {% if config.modulo_ventas %}
+            <a href="{{ url_for('historial_ventas') }}" class="nav-link"><i class="fa-solid fa-database" style="margin-right:12px;"></i> BD Ventas</a>
+        {% endif %}
+        
+        {% if config.modulo_taller %}
+            <a href="/admin/historial_taller" class="nav-link"><i class="fa-solid fa-clipboard-list" style="margin-right:12px;"></i> BD Taller</a>
+        {% endif %}
+        
+        <a href="{{ url_for('configuracion') }}" class="nav-link active"><i class="fa-solid fa-gear" style="margin-right:12px;"></i> Configuración</a>
+        <a href="{{ url_for('logout') }}" class="nav-link logout-btn"><i class="fa-solid fa-right-from-bracket" style="margin-right:12px;"></i> Salir</a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="header">
+            <!-- Botón Hamburguesa -->
+            <i class="fa-solid fa-bars menu-toggle" onclick="toggleMenu()"></i>
+            <div class="header-text">
+                <h1>Configuración</h1>
+                <p class="subtitle">Gestiona la información de tu negocio, integraciones y servicios.</p>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="background: #dcfce7; color: #166534; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0;">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- KIOSCO LINK -->
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-link"></i> Link de tu Kiosco Público</div>
+            <div class="card-body">
+                <div class="kiosco-box">
+                    <a href="{{ kiosco_url }}" target="_blank" class="kiosco-link" id="kLink">{{ kiosco_url }}</a>
+                    <button class="btn-copy" onclick="copiarLink()">Copiar</button>
+                </div>
+                <small style="color:#64748b;">Este es el enlace que debes compartir con tus clientes para que se formen o vean sus tickets.</small>
+            </div>
+        </div>
+
+        <form action="/api/guardar_config" method="POST">
+            <!-- TOKEN CSRF (CRÍTICO PARA QUE GUARDE) -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <!-- 1. DATOS GENERALES -->
+            <div class="card">
+                <div class="card-header"><i class="fa-solid fa-store"></i> Información del Negocio</div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Negocio</label>
+                            <input type="text" name="nombre" value="{{ negocio.nombre }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            <input type="text" name="direccion" value="{{ config.direccion }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Horarios</label>
+                            <input type="text" name="horarios" value="{{ config.horarios }}" placeholder="Ej. Lun-Vie 9am a 6pm">
+                        </div>
+                        <div class="form-group">
+                            <label>Link Encuesta Google Forms</label>
+                            <input type="url" name="url_encuesta" value="{{ config.url_encuesta }}" placeholder="https://forms.gle/...">
+                            <small>Se enviará por WhatsApp al entregar una venta.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. MÓDULOS -->
+            <div class="card">
+                <div class="card-header"><i class="fa-solid fa-layer-group"></i> Módulos Activos</div>
+                <div class="card-body">
+                    <div class="switch-group">
+                        <input type="checkbox" name="modulo_ventas" id="mV" {% if config.modulo_ventas %}checked{% endif %}>
+                        <label for="mV">Activar Punto de Venta (POS) y Base de Datos</label>
+                    </div>
+                    <div class="switch-group">
+                        <input type="checkbox" name="modulo_taller" id="mT" {% if config.modulo_taller %}checked{% endif %}>
+                        <label for="mT">Activar Taller de Reparaciones y Tickets</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. INTEGRACIONES -->
+            <div class="card">
+                <div class="card-header"><i class="fa-brands fa-whatsapp"></i> Integraciones (Mensajería)</div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>WhatsApp Token (Meta)</label>
+                            <input type="password" name="whatsapp_token" value="{{ negocio.whatsapp_token or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>WhatsApp Phone ID</label>
+                            <input type="text" name="whatsapp_id" value="{{ negocio.whatsapp_id or '' }}">
+                        </div>
+                    </div>
+                    <hr style="margin: 20px 0; border:0; border-top:1px solid #eee;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Twilio SID (SMS Respaldo)</label>
+                            <input type="text" name="twilio_sid" value="{{ negocio.twilio_sid or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Twilio Token</label>
+                            <input type="password" name="twilio_token" value="{{ negocio.twilio_token or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Twilio Phone From</label>
+                            <input type="text" name="twilio_from" value="{{ negocio.twilio_from or '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. PERSONALIZACIÓN FILA -->
+            <div class="card">
+                <div class="card-header"><i class="fa-solid fa-pen-nib"></i> Personalización Fila Virtual</div>
+                <div class="card-body form-grid">
+                    <div class="form-group">
+                        <label>Título Fila</label>
+                        <input type="text" name="fila_titulo" value="{{ config.fila_titulo }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" name="fila_descripcion" value="{{ config.fila_descripcion }}">
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-bottom: 40px;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 16px;"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+            </div>
+        </form>
+
+        <!-- 5. GESTIÓN DE SERVICIOS -->
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-tags"></i> Catálogo de Servicios</div>
+            <div class="card-body">
+                <form action="/api/servicios/agregar" method="POST" style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 20px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group" style="flex: 2; margin:0;">
+                        <label>Nombre Servicio</label>
+                        <input type="text" name="nombre_servicio" required placeholder="Ej. Mantenimiento PC">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin:0;">
+                        <label>Precio</label>
+                        <input type="text" name="precio_servicio" required placeholder="$500">
+                    </div>
+                    <button type="submit" class="btn btn-secondary" style="height: 42px;">Agregar</button>
+                </form>
+
+                <table>
+                    <thead><tr><th>Servicio</th><th>Precio</th><th>Acción</th></tr></thead>
+                    <tbody>
+                        {% for s in servicios %}
+                        <tr>
+                            <td>{{ s.nombre }}</td>
+                            <td>{{ s.precio }}</td>
+                            <td>
+                                <form action="/api/servicios/eliminar/{{ s.id }}" method="POST" onsubmit="return confirm('¿Borrar?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight:600;">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" style="text-align: center; color: #999;">Sin servicios registrados.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 6. CAMBIAR CONTRASEÑA -->
+        <div class="card" style="border-color: #fecaca;">
+            <div class="card-header" style="background: #fef2f2; color: #b91c1c;"><i class="fa-solid fa-lock"></i> Seguridad</div>
+            <div class="card-body">
+                <form action="/api/cambiar_password" method="POST" class="form-grid">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <label>Nueva Contraseña</label>
+                        <input type="password" name="nueva_pass" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Contraseña</label>
+                        <input type="password" name="confirm_pass" required>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn btn-danger" style="width: 100%;">Actualizar Clave</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        function copiarLink() {
+            var copyText = document.getElementById("kLink");
+            navigator.clipboard.writeText(copyText.innerText);
+            alert("Link copiado al portapapeles: " + copyText.innerText);
+        }
+
+        // Lógica del Menú Móvil
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

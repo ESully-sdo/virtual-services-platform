@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | Fila Virtual</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; position: relative; }
+        
+        .back-btn { position: absolute; top: 20px; left: 20px; color: #9ca3af; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .back-btn:hover { color: #374151; }
+
+        h2 { color: #111; margin-top: 10px; }
+        p { color: #6b7280; font-size: 14px; margin-bottom: 25px; }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border-color 0.2s; }
+        input:focus { outline: none; border-color: #3b82f6; ring: 2px solid #bfdbfe; }
+
+        button { width: 100%; padding: 14px; background-color: #111; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background-color: #333; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- Enlace dinámico para volver al inicio de ESTE negocio -->
+        <a href="/b/{{ nid }}" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+        
+        <div style="font-size: 40px; color: #3b82f6; margin-bottom: 10px;">
+            <i class="fa-solid fa-user-clock"></i>
+        </div>
+        <h2>Únete a la fila</h2>
+        <p>Ingresa tus datos para avisarte cuando sea tu turno.</p>
+        
+        <!-- Acción dinámica: Se envía a la API específica del negocio {{ nid }} -->
+        <form action="/api/b/{{ nid }}/registrar" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="input-group">
+                <label>Nombre Completo</label>
+                <input type="text" name="nombre" placeholder="Ej. Juan Pérez" required>
+            </div>
+            <div class="input-group">
+                <label>WhatsApp (10 dígitos)</label>
+                <input type="tel" name="telefono" placeholder="Ej. 5512345678" pattern="[0-9]{10}" required>
+            </div>
+            <button type="submit">Confirmar Lugar</button>
+        </form>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial Taller | {{ negocio_nombre }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Navegación Superior -->
+    <nav class="bg-[#0f172a] text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <a href="/admin" class="flex items-center text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i> Volver al Dashboard
+                    </a>
+                    <span class="ml-4 text-xl font-bold border-l border-indigo-500 pl-4">Base de Datos de Taller</span>
+                </div>
+                <div>
+                    <a href="/logout" class="text-sm 0f178a hover: bg-[#800000] px-3 py-2 rounded transition-colors">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Tarjeta de Resumen -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 p-6 border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-700">Total de Servicios de Taller</h2>
+                    <p class="text-gray-500 text-sm">Historial completo de equipos recibidos y reparados.</p>
+                </div>
+                <div class="text-3xl font-bold text-green-600">
+                    {{ reparaciones|length }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Datos -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Ingreso</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente / Equipo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Falla Reportada</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for r in reparaciones %}
+                        <tr class="hover:bg-gray-50 transition duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ r.fecha_ingreso }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ r.cliente_nombre }}</div>
+                                <div class="text-xs text-gray-500 font-mono">{{ r.dispositivo }} <span class="text-gray-400">| {{ r.telefono }}</span></div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ r.falla }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
+                                ${{ "%.2f"|format(r.costo) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if r.estatus == 'Entregado' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-check-double mr-1 mt-0.5"></i> ENTREGADO
+                                    </span>
+                                {% elif r.estatus == 'Listo' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <i class="fas fa-check mr-1 mt-0.5"></i> LISTO
+                                    </span>
+                                {% elif r.estatus == 'En Reparación' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-wrench mr-1 mt-0.5"></i> REPARANDO
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        {{ r.estatus|upper }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                <i class="fas fa-tools text-4xl mb-3 text-gray-300 block"></i>
+                                No hay registros en el taller aún.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

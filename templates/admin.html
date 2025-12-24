@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | {{ negocio_nombre }}</title>
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; transition: all 0.3s; }
+        
+        /* SIDEBAR */
+        .sidebar { background: #0f172a; color: #f1f5f9; padding: 24px; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.05); z-index: 50; transition: transform 0.3s ease; }
+        .logo { font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between; letter-spacing: -0.5px; }
+        .logo-text { display: flex; align-items: center; gap: 12px; }
+        .logo i { color: #3b82f6; font-size: 24px; }
+        .nav-link { display: flex; align-items: center; padding: 14px 16px; color: #94a3b8; text-decoration: none; border-radius: 10px; margin-bottom: 6px; font-weight: 500; transition: all 0.2s ease; font-size: 14px; }
+        .nav-link:hover { background-color: #1e293b; color: white; transform: translateX(4px); }
+        .nav-link.active { background-color: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .logout-btn { margin-top: auto; color: #ef4444 !important; background: rgba(239, 68, 68, 0.1); }
+        .logout-btn:hover { background: #ef4444; color: white !important; }
+        
+        /* CONTENIDO */
+        .main-content { padding: 30px 40px; width: 100%; overflow-x: hidden; }
+        
+        /* HEADER */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 35px; 
+            background: white; 
+            padding: 20px 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-left h1 { font-size: 24px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; margin: 0; }
+        .header-left p { color: #64748b; font-size: 14px; margin-top: 4px; font-weight: 500; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        
+        /* Business Badge */
+        .business-badge { display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 8px 16px 8px 8px; border-radius: 50px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .business-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3); }
+        .business-info { display: flex; flex-direction: column; }
+        .business-name { font-weight: 700; color: #334155; font-size: 14px; line-height: 1.2; }
+        .business-role { font-size: 11px; color: #94a3b8; font-weight: 500; text-transform: uppercase; }
+
+        /* MÓVIL: Botón de Menú Estilizado */
+        .menu-toggle { 
+            display: none; 
+            font-size: 20px; 
+            color: #334155; 
+            cursor: pointer;
+            background-color: #f1f5f9; /* Fondo suave para el botón */
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            margin-right: 10px;
+        }
+        .menu-toggle:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        .close-menu { display: none; cursor: pointer; color: #94a3b8; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 40; backdrop-filter: blur(2px); }
+
+        /* Resto de estilos */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .stat-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+        .stat-icon-wrapper { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 18px; }
+        .stat-label { font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 4px; letter-spacing: -1px; }
+        
+        .section-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 20px; margin-top: 40px; display: flex; align-items: center; gap: 10px; }
+        .card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 30px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th { background: #f8fafc; text-align: left; padding: 16px 24px; font-size: 12px; color: #475569; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .sales-header { color: #059669; }
+        .sales-form-grid { background: #f0fdf4; padding: 24px; border-bottom: 1px solid #dcfce7; display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; align-items: end; }
+        .sales-form-grid label { font-size: 13px; font-weight: 600; color: #166534; margin-bottom: 6px; display: block; }
+        .sales-form-grid input, .sales-form-grid select, .sales-form-grid textarea { padding: 10px; border: 1px solid #86efac; border-radius: 8px; width: 100%; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .sales-form-grid input:focus { border-color: #16a34a; ring: 2px solid #bbf7d0; }
+        .sales-form-grid .full-span { grid-column: span 6; }
+        .sales-form-grid .three-span { grid-column: span 3; }
+        
+        .btn-action { border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
+        .btn-action:active { transform: scale(0.95); }
+        .btn-notify { background: #dcfce7; color: #16a34a; }
+        .btn-notify:hover { background: #bbf7d0; }
+        .btn-check { background: #e2e8f0; color: #475569; }
+        .btn-check:hover { background: #cbd5e1; color: #1e293b; }
+        
+        .btn-add-sale { 
+            background: #16a34a; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;
+            box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2); transition: background 0.2s;
+        }
+        .btn-add-sale:hover { background: #15803d; }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) { 
+            body { grid-template-columns: 1fr; } 
+            .sidebar { position: fixed; left: -100%; width: 85%; max-width: 300px; height: 100vh; }
+            .sidebar.active { left: 0; }
+            .menu-toggle { display: block; } /* Mostrar botón hamburguesa */
+            .close-menu { display: block; }  /* Mostrar botón cerrar */
+            .overlay.active { display: block; }
+            .main-content { padding: 20px; }
+            /* Ajuste para que el botón no quede amontonado */
+            .header { flex-direction: column; align-items: stretch; gap: 15px; }
+            .header-left { justify-content: flex-start; } 
+            .sales-form-grid { grid-template-columns: 1fr; }
+            .sales-form-grid .three-span, .sales-form-grid .full-span { grid-column: span 1; }
+            .btn-add-sale { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay para cerrar menú en móvil -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-text">
+                <i class="fa-solid fa-cube"></i> Virtual<span>S.</span>
+            </div>
+            <!-- Botón cerrar en móvil (X) -->
+            <i class="fa-solid fa-times close-menu" onclick="toggleMenu()"></i>
+        </div>
+        
+        <a href="{{ url_for('admin') }}" class="nav-link active"><i class="fa-solid fa-gauge-high" style="margin-right:12px;"></i> Dashboard</a>
+        
+        <!-- BD FILA (Siempre activa) -->
+        <a href="/admin/historial_fila" class="nav-link"><i class="fa-solid fa-users-line" style="margin-right:12px;"></i> BD Fila</a>
+
+        <!-- MÓDULO VENTAS (Condicional) -->
+        {% if config.modulo_ventas %}
+            <a href="{{ url_for('historial_ventas') }}" class="nav-link"><i class="fa-solid fa-database" style="margin-right:12px;"></i> BD Ventas</a>
+        {% endif %}
+        
+        <!-- MÓDULO TALLER (Condicional) -->
+        {% if config.modulo_taller %}
+            <a href="/admin/historial_taller" class="nav-link"><i class="fa-solid fa-clipboard-list" style="margin-right:12px;"></i> BD Taller</a>
+        {% endif %}
+        
+        <a href="{{ url_for('configuracion') }}" class="nav-link"><i class="fa-solid fa-gear" style="margin-right:12px;"></i> Configuración</a>
+        <a href="{{ url_for('logout') }}" class="nav-link logout-btn"><i class="fa-solid fa-right-from-bracket" style="margin-right:12px;"></i> Salir</a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- HEADER CON BOTÓN MÓVIL ESTILIZADO -->
+        <header class="header">
+            <div class="header-left">
+                <!-- Botón Hamburguesa Estilizado (sin mr-4 para controlar con CSS) -->
+                <i class="fa-solid fa-bars menu-toggle" onclick="toggleMenu()"></i>
+                <div>
+                    <h1>Panel de Control</h1>
+                    <p>Resumen de actividad en tiempo real</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="business-badge">
+                    <div class="business-avatar">{{ negocio_nombre[0]|upper }}</div>
+                    <div class="business-info">
+                        <span class="business-name">{{ negocio_nombre }}</span>
+                        <span class="business-role">Administrador</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: #eff6ff; color: #3b82f6;"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-label">En Fila</div>
+                <div class="stat-value">{{ fila|length }}</div>
+            </div>
+            {% if config.modulo_taller %}
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: #fff7ed; color: #f59e0b;"><i class="fa-solid fa-wrench"></i></div>
+                <div class="stat-label">En Taller</div>
+                <div class="stat-value">{{ reparaciones|length }}</div>
+            </div>
+            {% endif %}
+            {% if config.modulo_ventas %}
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: #f0fdf4; color: #16a34a;"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="stat-label">Ventas Totales</div>
+                <div class="stat-value text-green" style="color: #16a34a;">${{ "%.2f"|format(total_ventas) }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 1. FILA VIRTUAL -->
+        <div class="section-title"><i class="fa-solid fa-list-ol" style="color: #3b82f6;"></i> Fila Virtual</div>
+        <div class="card">
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Turno</th><th>Cliente</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                        {% for c in fila %}
+                        <tr>
+                            <td style="font-weight: bold;">#{{ c.id }}</td>
+                            <td><div style="font-weight: 600; color: #1e293b;">{{ c.nombre }}</div></td>
+                            <td style="color: #64748b;">{{ c.telefono }}</td>
+                            <td><span class="badge" style="background: #eff6ff; color: #3b82f6;">{{ c.status|upper }}</span></td>
+                            <td>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn-action btn-notify" onclick="avisar('{{ c.id }}', '{{ c.nombre }}')" title="Avisar"><i class="fa-regular fa-bell"></i></button>
+                                    <button class="btn-action btn-check" onclick="atender('{{ c.id }}')" title="Atender"><i class="fa-solid fa-check"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;"><i class="fa-regular fa-circle-check" style="font-size: 24px; display:block; margin-bottom:10px;"></i>Nadie en la fila por ahora.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. PUNTO DE VENTA -->
+        {% if config.modulo_ventas %}
+        <a id="pos"></a>
+        <div class="section-title sales-header"><i class="fa-solid fa-cash-register" style="color: #16a34a;"></i> Registro de Ventas</div>
+        <div class="card sales-card" style="border-top: 4px solid #16a34a;">
+            <form action="/api/nueva_venta" method="POST" class="sales-form-grid">
+                <!-- TOKEN CSRF -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="input-group three-span"><label>Nombre Cliente</label><input type="text" name="cliente_nombre" required placeholder="Ej. Juan Pérez"></div>
+                <div class="input-group three-span"><label>Teléfono</label><input type="text" name="telefono" placeholder="55 1234 5678"></div>
+                <div class="input-group full-span"><label>Concepto / Producto</label><input type="text" name="concepto" required placeholder="Descripción del producto o servicio"></div>
+                
+                <div class="input-group"><label>Monto ($)</label><input type="number" name="monto" step="0.01" required placeholder="0.00"></div>
+                <div class="input-group"><label>ID Producto</label><input type="text" name="producto_id" placeholder="Opcional"></div>
+                <div class="input-group"><label>Correo</label><input type="email" name="correo" placeholder="cliente@email.com"></div>
+                <div class="input-group"><label>Método Pago</label>
+                    <select name="metodo_pago" style="padding:10px; border-radius:8px; border:1px solid #86efac; width:100%;">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+                </div>
+                <div class="input-group three-span"><label>Comentarios</label><textarea name="comentario" rows="1" placeholder="Notas adicionales..." style="resize: none;"></textarea></div>
+                <div class="input-group" style="grid-column: span 3; text-align: right;">
+                    <button type="submit" class="btn-add-sale" style="width: 100%;">Registrar Venta</button>
+                </div>
+            </form>
+
+            <table>
+                <thead><tr><th>Ticket</th><th>Cliente</th><th>Concepto</th><th>Monto</th><th>Estatus</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    {% for v in ventas %}
+                    <tr>
+                        <td style="font-weight: bold; color: #64748b;">#{{ v.id }}</td>
+                        <td>
+                            <div style="font-weight: 600; color: #1e293b;">{{ v.cliente_nombre }}</div>
+                            <div style="font-size: 12px; color: #64748b;">{{ v.telefono }}</div>
+                        </td>
+                        <td>{{ v.concepto }}</td>
+                        <td style="font-weight:800; color: #16a34a;">${{ "%.2f"|format(v.monto) }}</td>
+                        <td>
+                            <select onchange="cambiarEstatusVenta('{{ v.id }}', this.value)" style="padding: 6px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; cursor: pointer;">
+                                <option value="En Proceso" {% if v.estatus == 'En Proceso' %}selected{% endif %}>En Proceso</option>
+                                <option value="entregado" {% if v.estatus == 'entregado' %}selected{% endif %} style="color: #16a34a; font-weight: bold;">Entregado (Finalizar)</option>
+                                <option value="Cancelado" {% if v.estatus == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn-action" onclick="enviarEncuesta('{{ v.id }}', '{{ v.cliente_nombre }}')" title="Enviar Encuesta Manual" style="background: #3b82f6; color: white;">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">No hay ventas pendientes.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- 3. TALLER -->
+        {% if config.modulo_taller %}
+        <a id="repair"></a>
+        <div class="section-title repair-header"><i class="fa-solid fa-screwdriver-wrench" style="color: #f59e0b;"></i> Taller de Reparaciones</div>
+        <div class="card repair-card" style="border-top: 4px solid #f59e0b;">
+            <form action="/api/nueva_reparacion" method="POST" style="padding: 24px; background: #fff7ed; border-bottom: 1px solid #ffedd5; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; align-items: end;">
+                <!-- TOKEN CSRF -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div><label style="font-size:12px; font-weight:600; color: #c2410c;">Cliente</label><input type="text" name="nombre" required style="width:100%; padding:10px; border:1px solid #fdba74; border-radius:8px;"></div>
+                <div><label style="font-size:12px; font-weight:600; color: #c2410c;">Teléfono</label><input type="text" name="telefono" required style="width:100%; padding:10px; border:1px solid #fdba74; border-radius:8px;"></div>
+                <div><label style="font-size:12px; font-weight:600; color: #c2410c;">Equipo</label><input type="text" name="dispositivo" required style="width:100%; padding:10px; border:1px solid #fdba74; border-radius:8px;"></div>
+                <div><label style="font-size:12px; font-weight:600; color: #c2410c;">Falla</label><input type="text" name="falla" required style="width:100%; padding:10px; border:1px solid #fdba74; border-radius:8px;"></div>
+                <div><label style="font-size:12px; font-weight:600; color: #c2410c;">Costo</label><input type="number" name="costo" required style="width:100%; padding:10px; border:1px solid #fdba74; border-radius:8px;"></div>
+                <button type="submit" style="background: #f97316; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600;">Ingresar</button>
+            </form>
+            
+            <table>
+                <thead><tr><th>Ticket</th><th>Equipo</th><th>Falla</th><th>Estatus</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    {% for r in reparaciones %}
+                    <tr>
+                        <td>#{{ r.id }}</td><td>{{ r.dispositivo }}</td><td>{{ r.falla }}</td>
+                        <td>
+                            <select onchange="cambiarStatus('{{ r.id }}', this.value)" style="padding: 6px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <option value="Recibido" {% if r.estatus == 'Recibido' %}selected{% endif %}>Recibido</option>
+                                <option value="En Revisión" {% if r.estatus == 'En Revisión' %}selected{% endif %}>Revisión</option>
+                                <option value="En Reparación" {% if r.estatus == 'En Reparación' %}selected{% endif %}>Reparando</option>
+                                <option value="Listo" {% if r.estatus == 'Listo' %}selected{% endif %}>Listo</option>
+                                <option value="Entregado" {% if r.estatus == 'Entregado' %}selected{% endif %}>Entregado</option>
+                            </select>
+                        </td>
+                        <td><a href="/api/notificar_reparacion/{{ r.id }}" style="color: #16a34a; font-weight: 600;"><i class="fa-brands fa-whatsapp"></i> Notificar</a></td>
+                    </tr>
+                    {% else %}<tr><td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">No hay equipos.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- SCRIPT DE SEGURIDAD PARA BOTONES (AJAX) -->
+    <script>
+        // 1. Obtener el Token CSRF desde el backend
+        const csrfToken = "{{ csrf_token() }}";
+
+        // 2. Función Toggle Menú Móvil
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 3. Función para Avisar (Fila)
+        function avisar(id, nombre) {
+            if(confirm(`¿Avisar a ${nombre}?`)) {
+                fetch(`/api/notificar/${id}`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                }).then(r => r.json()).then(d => { alert("Estado: " + d.status); location.reload(); });
+            }
+        }
+
+        // 4. Función para Atender
+        function atender(id) {
+            fetch(`/api/atender/${id}`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            }).then(() => location.reload());
+        }
+
+        // 5. Cambiar Status Taller
+        function cambiarStatus(id, nuevoStatus) {
+            let notificar = (nuevoStatus === 'Listo') ? confirm("¿Enviar aviso WhatsApp?") : false;
+            fetch(`/api/actualizar_reparacion/${id}`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken 
+                },
+                body: JSON.stringify({ estatus: nuevoStatus, notificar: notificar })
+            }).then(() => location.reload());
+        }
+
+        // 6. Cambiar Status Venta
+        function cambiarEstatusVenta(id, nuevoEstatus) {
+            if(confirm("¿Confirmar cambio de estado?")) {
+                let formData = new FormData();
+                formData.append('estatus', nuevoEstatus);
+                formData.append('notificar_encuesta', 'true'); 
+
+                fetch(`/api/actualizar_estado/${id}`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                }).then(() => {
+                    window.location.reload();
+                }).catch(err => alert("Error al actualizar"));
+            }
+        }
+
+        // 7. Enviar Encuesta Manual
+        function enviarEncuesta(id, nombre) {
+            if(confirm(`¿Enviar encuesta a ${nombre}?`)) {
+                fetch(`/api/enviar_encuesta/${id}`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                }).then(r => r.json()).then(d => alert(d.status));
+            }
+        }
+    </script>
+</body>
+</html>

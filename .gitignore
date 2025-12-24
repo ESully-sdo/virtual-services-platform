@@ -1,0 +1,25 @@
+--- SEGURIDAD CRÍTICA ---
+
+.env
+*.pem
+*.key
+*.sql.gz
+backups/
+
+--- PYTHON ---
+
+pycache/
+*.py[cod]
+*$py.class
+venv/
+env/
+
+--- SISTEMA ---
+
+.DS_Store
+Thumbs.db
+
+--- OTROS ---
+
+ngrok
+*.log
